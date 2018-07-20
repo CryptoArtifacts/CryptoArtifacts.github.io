@@ -11,30 +11,116 @@
             dataLayer.push(arguments);
         }
         gtag('js', new Date());
-
         gtag('config', 'UA-114068290-3');
     </script>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>CryptoArtifacts.co</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css">
+    <link rel="stylesheet" href="css/styles.css">
     <script defer src="https://use.fontawesome.com/releases/v5.1.0/js/all.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue"></script>
 </head>
 
 <body>
+    <div id="app">
+        <section class="section">
+            <div class="container">
+                <div>
+                    <img src="armor.png" />
+                </div>
+                <h1 class="title">
+                    CryptoArtifacts
+                </h1>
+                <p class="subtitle">
+                    Fantasy RPG game with loot that's
+                    <a href="http://erc721.org/">ERC-721</a> tokens.
+                    <br> Coming
+                    <i>soon</i>.
+                </p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container">
+                <div class="lootboxes">
+                    <h2 class="subtitle">Open lootboxes</h2>
+                    <button class="button">Open 2 lootboxes</button>
+                    <button class="button">Open 7 lootboxes</button>
+                    <button class="button">Open 15 lootboxes</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container">
+                <div class="equipped">
+                    <h2 class="subtitle">Your equipment</h2>
+
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container">
+                <div class="owned">
+                    <h2 class="subtitle">All your artifacts</h2>
+
+                    <div v-for="item in items" class="media item">
+                        <figure class="media-left">
+                            <p class="image is-128x128">
+                                <img v-bind:src="'assets/sets/0/' + item.img + '.png'">
+                            </p>
+                        </figure>
+                        <div class="media-content">
+                            <div class="content">
+                                <p>
+                                    <strong>{{item.data.name}}</strong>
+                                    <br>
+                                    <small>3 Power (2 + 1 Bonus Power)</small>
+                                    <br> {{item.data.description}}
+                                    <br>
+                                    <button class="button">Equip</button>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+    </div>
+
     <section class="section">
         <div class="container">
-            <div><img src="armor.png" /></div>
-            <h1 class="title">
-                CryptoArtifacts
-            </h1>
-            <p class="subtitle">
-                Fantasy RPG game with loot that's <a href="http://erc721.org/">ERC-721</a> tokens.<br>
-                Coming <i>soon</i>.
-            </p>
+            <h2 class="subtitle">Ranking</h2>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Position</th>
+                        <th>Address / Name</th>
+                        <th>Power</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>Arispen</td>
+                        <td>9001</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>0x75e85c4a25d6b45e63a59d544125eb153d2d18c2</td>
+                        <td>8999</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </section>
+
+
+    <script src="js/loot.js"></script>
+    <script src="js/app.js"></script>
 </body>
 
 </html>
