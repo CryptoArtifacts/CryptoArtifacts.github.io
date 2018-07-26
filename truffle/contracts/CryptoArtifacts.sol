@@ -8,12 +8,16 @@ contract CryptoArtifacts is ERC721Token("CryptoArtifacts", "CA"), Ownable {
     uint currentSet = 0;
     uint numberOfSlots = 9;
     uint lootboxesLeft = 10000;
+    
+    uint smallPackPrice = 6 finney;
+    uint mediumPackPrice = 20 finney;
+    uint bigPackPrice = 40 finney;
 
     struct Artifact {
         uint set;
         uint slot;
-        uint power;
-        uint bonus;
+        uint power; // aka type
+        uint bonus; // aka variant
     }
 
     mapping (uint => Artifact) artifacts;
@@ -22,22 +26,37 @@ contract CryptoArtifacts is ERC721Token("CryptoArtifacts", "CA"), Ownable {
 
     mapping (address => string) playerNames;
 
-    function equip(address _player, uint _artifact, uint _slot) public {
-
+    function equip(uint _artifactId) public {
+        require(ownerOf(_artifactId) == msg.sender);
+        uint slot = artifacts[_artifactId].slot;
+        equipped[msg.sender][slot] = _artifactId;
     }
 
-    function updateGame(uint _newCurrentSet, uint _newNumberOfSlots, uint _newLootboxesLeft) onlyOwner public {
-        currentSet = _newCurrentSet;
-        numberOfSlots = _newNumberOfSlots;
-        lootboxesLeft = _newLootboxesLeft;
+    function updateGame(uint _currentSet, uint _numberOfSlots, uint _lootboxesLeft) onlyOwner public {
+        currentSet = _currentSet;
+        numberOfSlots = _numberOfSlots;
+        lootboxesLeft = _lootboxesLeft;
+    }
+    
+    function updatePricing(uint _small, uint _medium, uint _big) onlyOwner public {
+        smallPackPrice = _small;
+        mediumPackPrice = _medium;
+        bigPackPrice = _big;
     }
 
-    function openLootboxes(uint _amount) public {
+    function openLootboxes(uint _amount) public payable {
         require(lootboxesLeft >= _amount);
-        lootboxesLeft.sub(_amount);
+        require(_amount == 2 || _amount == 7 || _amount == 15);
+        require(msg.value == _amount
+        lootboxesLeft = lootboxesLeft.sub(_amount);
         uint id = allTokens.length.add(1);
         _mint(msg.sender, id);
         artifacts[id] = Artifact(0, 0, 1, 0);
+        _setTokenURI(id, "https://cryptoartifacts.co/artifactimages/" 
+            + artifacts[id].set 
+            + "-" + artifacts[id].slot 
+            + "-" + artifacts[id].power 
+            + "-" + artifacts[id].bonus );
     }
 
 }
