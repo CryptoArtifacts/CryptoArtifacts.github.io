@@ -9,7 +9,7 @@ contract CryptoArtifacts is ERC721Token("CryptoArtifacts", "CA"), Ownable {
     uint numberOfSlots = 9;
     uint lootboxesLeft = 10000;
     
-    uint packPrice = 6 finney;
+    uint packPrice = 500 szabo;
 
     struct Artifact {
         uint set;
@@ -37,8 +37,9 @@ contract CryptoArtifacts is ERC721Token("CryptoArtifacts", "CA"), Ownable {
         lootboxesLeft = _lootboxesLeft;
     }
     
-    function updatePricing(uint _price) onlyOwner public {
-        packPrice = _price;
+    function updatePricing() private {
+        // 1 usd = 2000000000000000 wei
+        packPrice = lootboxesLeft.mul(2000000000000000).div(100);
     }
 
     function openLootboxes(uint _amount) public payable {
