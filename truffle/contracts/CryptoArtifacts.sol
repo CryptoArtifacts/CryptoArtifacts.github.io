@@ -22,8 +22,6 @@ contract CryptoArtifacts is ERC721Token("CryptoArtifacts", "CA"), Ownable {
 
     mapping (address => uint[]) equipped;
 
-    mapping (address => string) playerNames;
-
     function equip(uint _artifactId) public {
         require(ownerOf(_artifactId) == msg.sender);
         uint slot = artifacts[_artifactId].slot;
@@ -39,13 +37,13 @@ contract CryptoArtifacts is ERC721Token("CryptoArtifacts", "CA"), Ownable {
     
     function updatePricing() private {
         // 1 usd = 2000000000000000 wei
-        packPrice = lootboxesLeft.mul(2000000000000000).div(100);
+        packPrice = lootboxesLeft.mul(lootboxesLeft).mul(2000000000000000).div(1000000);
     }
 
     function openLootboxes(uint _amount) public payable {
         require(lootboxesLeft >= _amount);
         require(_amount >= 1);
-        require(msg.value >= _amount.mul(packPrice));
+        require(msg.value >= calculatePrice(_amount));
         
         // for loop here
         lootboxesLeft = lootboxesLeft.sub(_amount);
@@ -57,6 +55,12 @@ contract CryptoArtifacts is ERC721Token("CryptoArtifacts", "CA"), Ownable {
             + "-" + artifacts[id].slot 
             + "-" + artifacts[id].power 
             + "-" + artifacts[id].bonus );
+    }
+    
+    function calculatePrice(_number) {
+        for(uint i; i< _number; i++) {
+            
+        }
     }
     
     function generateArtifact() returns (Artifact) {
