@@ -31,6 +31,7 @@ contract CryptoArtifacts is ERC721Token("CryptoArtifacts", "CA"), Ownable {
     }
 
     function updateGame(uint _currentSet, uint _numberOfSlots, uint _lootboxesLeft) onlyOwner public {
+        require(_currentSet > currentSet);
         currentSet = _currentSet;
         numberOfSlots = _numberOfSlots;
         lootboxesLeft = _lootboxesLeft;
