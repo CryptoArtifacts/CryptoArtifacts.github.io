@@ -24,32 +24,30 @@ contract CryptoArtifacts is ERC721Token("CryptoArtifacts", "CA"), Ownable {
     mapping (address => bool) existingPlayers;
     address[] listOfPlayers;
     
-    function random(uint64 upper) public returns (uint64 randomNumber) {
-        uint _seed = lootboxesLeft;
-        _seed = uint64(sha3(sha3(blockhash(block.number), _seed), now));
-        return _seed % upper;
+    function random(uint upper) public view returns (uint) {
+        return uint(block.blockhash(block.number-1 * lootboxesLeft * listOfPlayers.length * block.timestamp)) % upper + 1;
     }
     
-    function k100() returns (uint) {
+    function k100() private view returns (uint) {
         return random(100);
     }
     
     // returns 0,1,2,3
     // 1%, 4%, 25%, 70%
-    function distributed4() returns (uint) {
-        uint k100 = k100();
-        if(k100 <= 1){
+    function distributed4() private view returns (uint) {
+        uint k100roll = k100();
+        if(k100roll <= 1){
             return 3;
-        } else if (k100 <= 5) {
+        } else if (k100roll <= 5) {
             return 2;
-        } else if (k100 <= 25) {
+        } else if (k100roll <= 25) {
             return 1;
         } else {
             return 0;
         }
     }
     
-    function updateListOfPlayers() {
+    function updateListOfPlayers() private {
         require(existingPlayers[msg.sender] == false);
         listOfPlayers.push(msg.sender);
         existingPlayers[msg.sender] == true;
@@ -59,7 +57,6 @@ contract CryptoArtifacts is ERC721Token("CryptoArtifacts", "CA"), Ownable {
         require(ownerOf(_artifactId) == msg.sender);
         uint _slot = artifacts[_artifactId].slot;
         equipped[msg.sender][_slot] = _artifactId;
-        updateListOfPlayers();
     }
 
     function updateGame(uint _set, uint _numberOfSlots, uint _lootboxesLeft) onlyOwner public {
@@ -85,6 +82,8 @@ contract CryptoArtifacts is ERC721Token("CryptoArtifacts", "CA"), Ownable {
         for (uint i = 0; i < _number; i++) {
             openOneLootbox();
         }
+        
+        updateListOfPlayers();
     }
     
     function openOneLootbox() private {
@@ -93,27 +92,33 @@ contract CryptoArtifacts is ERC721Token("CryptoArtifacts", "CA"), Ownable {
         uint _id = allTokens.length.add(1);
         _mint(msg.sender, _id);
         artifacts[_id] = generateArtifact();
-        _setTokenURI(_id, "https://cryptoartifacts.co/artifactimages/" 
-            + artifacts[_id].set 
-            + "-" + artifacts[_id].slot 
-            + "-" + artifacts[_id].power 
-            + "-" + artifacts[_id].bonus );
+        _setTokenURI(
+            _id,
+            string(
+                abi.encodePacked(
+                "https://cryptoartifacts.co/artifactimages/",
+                artifacts[_id].set,
+                artifacts[_id].slot,
+                artifacts[_id].power,
+                artifacts[_id].bonus
+            ))
+        );
     }
     
-    function calculateOpenPrice(_number) private view returns (uint) {
+    function calculateOpenPrice(uint _numberOfLootboxes) private view returns (uint) {
         // 1 usd = 2000000000000000 wei
         uint total = 0;
-        for (uint i = 0; i < _number; i++) {
+        for (uint i = 0; i < _numberOfLootboxes; i++) {
             total.add(getCurrentPrice());
         }
         return total;
     }
     
-    function generateArtifact() private returns (Artifact) {
+    function generateArtifact() private view returns (Artifact) {
         uint _slot = random(numberOfSlots);
         uint _power = distributed4() + 1; // 1,2,3,4
         uint _bonus = distributed4(); // 0,1,2,3
-        return Artifact(currentSet, _slot, _power, _bonus);
+        return Artifact(set, _slot, _power, _bonus);
     }
 
 }
