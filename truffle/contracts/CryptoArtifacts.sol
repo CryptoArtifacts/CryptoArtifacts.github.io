@@ -5,10 +5,11 @@ import "../node_modules/openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 contract CryptoArtifacts is ERC721Token("CryptoArtifacts", "CA"), Ownable {
 
-    uint set = 0;
-    uint numberOfSlots = 9;
-    uint lootboxesLeft = 10000;
-    uint packPrice = 500 szabo;
+    uint public set = 0;
+    uint public numberOfSlots = 9;
+    uint public lootboxesLeft = 10000;
+    uint public packPrice = 0;
+    uint public initialLootboxes = 10000;
 
     struct Artifact {
         uint set;
@@ -17,15 +18,20 @@ contract CryptoArtifacts is ERC721Token("CryptoArtifacts", "CA"), Ownable {
         uint bonus; // aka variant
     }
 
-    mapping (uint => Artifact) artifacts;
+    mapping (uint => Artifact) public artifacts;
 
-    mapping (address => uint[]) equipped;
+    mapping (address => uint[]) public equipped;
     
-    mapping (address => bool) existingPlayers;
-    address[] listOfPlayers;
+    mapping (address => bool) public existingPlayers;
+    address[] public listOfPlayers;
+    
+    event LootboxesOpened();
+    event ArtifactEquipped();
+    event NewPlayer();
+    event GameUpdated();
     
     function random(uint upper) public view returns (uint) {
-        return uint(block.blockhash(block.number-1 * lootboxesLeft * listOfPlayers.length * block.timestamp)) % upper + 1;
+        return uint(blockhash(block.number-1 * lootboxesLeft * listOfPlayers.length * block.timestamp)) % upper + 1;
     }
     
     function k100() private view returns (uint) {
@@ -64,10 +70,12 @@ contract CryptoArtifacts is ERC721Token("CryptoArtifacts", "CA"), Ownable {
         set = _set;
         numberOfSlots = _numberOfSlots;
         lootboxesLeft = _lootboxesLeft;
+        initialLootboxes = _lootboxesLeft;
     }
     
     function getCurrentPrice() public view returns (uint) {
-        return lootboxesLeft.mul(lootboxesLeft).mul(2000000000000000).div(1000000);
+        uint lootboxesSold = initialLootboxes.sub(lootboxesLeft);
+        return lootboxesSold.mul(lootboxesSold).mul(2000000000000000).div(1000000);
     }
     
     function updatePrice() private {
