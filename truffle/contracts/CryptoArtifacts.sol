@@ -31,7 +31,7 @@ contract CryptoArtifacts is ERC721Token("CryptoArtifacts", "CA"), Ownable {
     event GameUpdated();
     
     function random(uint upper) public view returns (uint) {
-        return uint(blockhash(block.number-1 * lootboxesLeft * listOfPlayers.length * block.timestamp)) % upper + 1;
+        return uint(blockhash((block.number - 1) * lootboxesLeft * listOfPlayers.length * block.timestamp)) % upper + 1;
     }
     
     function k100() private view returns (uint) {
@@ -85,18 +85,19 @@ contract CryptoArtifacts is ERC721Token("CryptoArtifacts", "CA"), Ownable {
     function openLootboxes(uint _number) public payable {
         require(lootboxesLeft >= _number);
         require(_number >= 1);
-        require(msg.value >= calculateOpenPrice(_number));
+        // no matter how many player buys, we always get the last price
+        require(msg.value >= _number.mul(getCurrentPrice()));
         
         for (uint i = 0; i < _number; i++) {
             openOneLootbox();
         }
         
         updateListOfPlayers();
+        updatePrice();
     }
     
     function openOneLootbox() private {
         lootboxesLeft = lootboxesLeft.sub(1);
-        updatePrice();
         uint _id = allTokens.length.add(1);
         _mint(msg.sender, _id);
         artifacts[_id] = generateArtifact();
@@ -111,15 +112,6 @@ contract CryptoArtifacts is ERC721Token("CryptoArtifacts", "CA"), Ownable {
                 artifacts[_id].bonus
             ))
         );
-    }
-    
-    function calculateOpenPrice(uint _numberOfLootboxes) private view returns (uint) {
-        // 1 usd = 2000000000000000 wei
-        uint total = 0;
-        for (uint i = 0; i < _numberOfLootboxes; i++) {
-            total.add(getCurrentPrice());
-        }
-        return total;
     }
     
     function generateArtifact() private view returns (Artifact) {
