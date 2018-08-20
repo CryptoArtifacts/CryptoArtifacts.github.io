@@ -43,11 +43,22 @@
 
         <section class="section">
             <div class="container">
+                <div class="lootboxprice">
+                    <h2 class="subtitle">Current lootbox price</h2>
+                    <span>1 lootbox = 0.0007 ETH</span>
+                    <hr>
+                    <h2 class="subtitle">Lootboxes left</h2>
+                    <span>9764</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container">
                 <div class="lootboxes">
                     <h2 class="subtitle">Open lootboxes</h2>
-                    <button class="button">Open 2 lootboxes</button>
-                    <button class="button">Open 7 lootboxes</button>
-                    <button class="button">Open 15 lootboxes</button>
+                    <label>How many lootboxes you want to open: </label><input class="input" type="number" />
+                    <button class="button">Open</button>
                 </div>
             </div>
         </section>
@@ -69,18 +80,18 @@
                     <div v-for="item in items" class="media item">
                         <figure class="media-left">
                             <p class="image is-128x128">
-                                <img v-bind:src="'assets/sets/0/' + item.img + '.png'">
+                                <img v-bind:src="'assets/sets/0/' + item.slot + '/' + item.type + '.png'">
                             </p>
                         </figure>
                         <div class="media-content">
                             <div class="content">
                                 <p>
-                                    <strong>{{item.data.name}}</strong>
+                                    <strong>{{getName(item.slot, item.type, item.bonus)}}</strong>
                                     <br>
-                                    <small>3 Power (2 + 1 Bonus Power)</small>
-                                    <br> {{item.data.description}}
+                                    <small>{{getPower(item.type, item.bonus)}} Power ({{item.type + 1}} + {{item.bonus}} Bonus Power)</small>
+                                    <br> {{getDescription(item.slot, item.type)}}
                                     <br>
-                                    <button class="button">Equip</button>
+                                    <button class="button" v-on:click="equip(item)">Equip</button>
                                 </p>
                             </div>
                         </div>
