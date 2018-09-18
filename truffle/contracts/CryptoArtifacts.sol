@@ -110,50 +110,38 @@ contract CryptoArtifacts is ERC721Token("CryptoArtifacts", "CA"), Ownable {
         return Artifact(_slot, _power);
     }
 
-    function uint2str(uint _i) internal pure returns (string){
-        if (_i == 0) return "0";
-        uint j = _i;
-        uint i = _i;
-        uint length;
-        while (j != 0){
-            length++;
-            j /= 10;
+    function appendUintToString(string _inStr, uint _v) private view returns (string str) {
+        uint v = _v;
+        string memory inStr = _inStr;
+        uint maxlength = 100;
+        bytes memory reversed = new bytes(maxlength);
+        uint i = 0;
+        
+        while (v != 0) {
+            uint remainder = v % 10;
+            v = v / 10;
+            reversed[i++] = byte(48 + remainder);
         }
-        bytes memory bstr = new bytes(length);
-        uint k = length - 1;
-        while (i != 0){
-            bstr[k--] = byte(48 + i % 10);
-            i /= 10;
+        bytes memory inStrb = bytes(inStr);
+        bytes memory s = new bytes(inStrb.length + i);
+        uint j;
+        for (j = 0; j < inStrb.length; j++) {
+            s[j] = inStrb[j];
         }
-        return string(bstr);
-    }
-
-    function strConcat(string _a, string _b, string _c, string _d, string _e) internal pure returns (string){
-        bytes memory _ba = bytes(_a);
-        bytes memory _bb = bytes(_b);
-        bytes memory _bc = bytes(_c);
-        bytes memory _bd = bytes(_d);
-        bytes memory _be = bytes(_e);
-        string memory abcde = new string(_ba.length + _bb.length + _bc.length + _bd.length + _be.length);
-        bytes memory babcde = bytes(abcde);
-        uint k = 0;
-        for (uint i = 0; i < _ba.length; i++) babcde[k++] = _ba[i];
-        for (i = 0; i < _bb.length; i++) babcde[k++] = _bb[i];
-        for (i = 0; i < _bc.length; i++) babcde[k++] = _bc[i];
-        for (i = 0; i < _bd.length; i++) babcde[k++] = _bd[i];
-        for (i = 0; i < _be.length; i++) babcde[k++] = _be[i];
-        return string(babcde);
+        for (j = 0; j < i; j++) {
+            s[j + inStrb.length] = reversed[i - 1 - j];
+        }
+        str = string(s);
     }
 
     function setTokenURI(uint id, uint slot, uint power) private {
         uint uriId = initialLootboxes.mul(slot).add(power);
 
-        string memory url_1 = "https://cryptoartifacts.co/artifactimages/";
-        string memory url_2 = uint2str(uriId);
+        string memory uri = "https://cryptoartifacts.co/artifactimages/";
 
         _setTokenURI(
             id, 
-            strConcat(url_1, url_2, "", "", "")
+            appendUintToString(uri, uriId)
         );
     }
 
