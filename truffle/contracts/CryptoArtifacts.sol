@@ -6,29 +6,24 @@ import "../node_modules/openzeppelin-solidity/contracts/ownership/Ownable.sol";
 contract CryptoArtifacts is ERC721Token("CryptoArtifacts", "CA"), Ownable {
 
     uint constant public initialLootboxes = 10000;
-    uint constant public numberOfSlots = 9;
+    uint constant public numberOfTypes = 9; 
 
     uint public lootboxesLeft = 10000;
     uint public packPrice = 0;
 
+    uint constant basePrice = 5000000000000000; // ~1usd
+
     struct Artifact {
-        uint slot;
+        uint slot; // aka type
         uint power; // aka rarity
     }
 
     mapping (uint => Artifact) public artifacts;
-
-    mapping (address => uint[]) public equipped;
     
-    mapping (address => bool) public existingPlayers;
-    address[] public listOfPlayers;
-    
-    event LootboxesOpened(uint number, address by);
-    event ArtifactEquipped(Artifact artifact, address by);
-    event NewPlayer(address playerAddress);
+    event LootboxOpened(address by, uint price);
     
     function random(uint upper) public view returns (uint) {
-        return uint(blockhash(block.number-1 * lootboxesLeft * listOfPlayers.length * block.timestamp)) % upper + 1;
+        return uint(blockhash(block.number-1 * lootboxesLeft)) % upper + 1;
     }
     
     function k100() private view returns (uint) {
@@ -50,40 +45,22 @@ contract CryptoArtifacts is ERC721Token("CryptoArtifacts", "CA"), Ownable {
         }
     }
     
-    function updateListOfPlayers() private {
-        require(existingPlayers[msg.sender] == false, "added player must be new");
-        listOfPlayers.push(msg.sender);
-        existingPlayers[msg.sender] == true;
-        emit NewPlayer(msg.sender);
-    }
-
-    function equip(uint _artifactId) public {
-        require(ownerOf(_artifactId) == msg.sender, "only owner can equip item");
-        uint _slot = artifacts[_artifactId].slot;
-        equipped[msg.sender][_slot] = _artifactId;
-        emit ArtifactEquipped(artifacts[_artifactId], msg.sender);
-    }
-    
     function getCurrentPrice() public view returns (uint) {
         uint lootboxesSold = initialLootboxes.sub(lootboxesLeft);
-        return lootboxesSold.mul(lootboxesSold).mul(2000000000000000).div(1000000);
+        return lootboxesSold.mul(lootboxesSold).mul(basePrice).div(1000000);
     }
     
     function updatePrice() private {
         packPrice = getCurrentPrice();
     }
 
-    function openLootboxes(uint _number) public payable {
-        require(lootboxesLeft >= _number, "no lootboxes left");
-        require(_number >= 1, "number of lootboxes to open must be 1 or more");
-        require(msg.value >= calculateOpenPrice(_number), "invalid price");
+    function openLootbox() public payable {
+        require(lootboxesLeft >= 1, "no lootboxes left");
+        require(msg.value >= getCurrentPrice(), "invalid price");
         
-        for (uint i = 0; i < _number; i++) {
-            openOneLootbox();
-        }
+        openOneLootbox();
         
-        updateListOfPlayers();
-        emit LootboxesOpened(_number, msg.sender);
+        emit LootboxOpened(msg.sender, msg.value);
     }
     
     function openOneLootbox() private {
@@ -95,22 +72,13 @@ contract CryptoArtifacts is ERC721Token("CryptoArtifacts", "CA"), Ownable {
         setTokenURI(_id, artifacts[_id].slot, artifacts[_id].power);
     }
     
-    function calculateOpenPrice(uint _numberOfLootboxes) private view returns (uint) {
-        // 1 usd = 2000000000000000 wei
-        uint total = 0;
-        for (uint i = 0; i < _numberOfLootboxes; i++) {
-            total.add(getCurrentPrice());
-        }
-        return total;
-    }
-    
     function generateArtifact() private view returns (Artifact) {
-        uint _slot = random(numberOfSlots);
+        uint _slot = random(numberOfTypes);
         uint _power = rollPower();
         return Artifact(_slot, _power);
     }
 
-    function appendUintToString(string _inStr, uint _v) private view returns (string str) {
+    function appendUintToString(string _inStr, uint _v) private pure returns (string str) {
         uint v = _v;
         string memory inStr = _inStr;
         uint maxlength = 100;
@@ -135,9 +103,11 @@ contract CryptoArtifacts is ERC721Token("CryptoArtifacts", "CA"), Ownable {
     }
 
     function setTokenURI(uint id, uint slot, uint power) private {
-        uint uriId = initialLootboxes.mul(slot).add(power);
+        uint uriId = 10 * (slot + 1) + (power + 1);
+        // ex: 10 * (0+1) + (0+1) = 11
+        // ex2:10 * (8+1) + (8+1) = 99
 
-        string memory uri = "https://cryptoartifacts.co/artifactimages/";
+        string memory uri = "https://cryptoartifacts.co/artifact/";
 
         _setTokenURI(
             id, 
