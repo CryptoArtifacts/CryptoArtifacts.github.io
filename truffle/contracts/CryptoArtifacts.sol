@@ -13,7 +13,7 @@ contract CryptoArtifacts is ERC721Full("CryptoArtifacts", "CA") {
     event LootboxOpened(address by, uint tokenId, uint artifactType);
     
     function random(uint lower, uint upper) private view returns (uint) {
-        return uint(blockhash(block.number-1 * lootboxesLeft)) % upper + lower;
+        return (uint(keccak256(abi.encodePacked(now, msg.sender, lootboxesLeft))) % (upper-lower)) + lower;
     }
     
     // returns 1-80
