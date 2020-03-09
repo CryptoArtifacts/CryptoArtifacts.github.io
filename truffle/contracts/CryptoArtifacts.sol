@@ -1,16 +1,20 @@
-pragma solidity ^0.5.9;
+pragma solidity ^0.6.0;
 
+import "https://raw.githubusercontent.com/OpenZeppelin/openzeppelin-contracts/master/contracts/ownership/Ownable.sol";
 import "https://raw.githubusercontent.com/OpenZeppelin/openzeppelin-solidity/master/contracts/token/ERC721/ERC721Full.sol";
 
-contract CryptoArtifacts is ERC721Full("CryptoArtifacts", "CA") {
 
-    uint public lootboxesLeft = 10000;
-
-    uint constant lootboxPrice = 20000000000000000; // 0.02 eth
+contract CryptoArtifacts is ERC721Full, Ownable {
+    
+    uint constant initialLootboxes = 10000;
+    uint public lootboxesLeft = initialLootboxes;
+    uint constant priceConstant = 5000000000000000; // 0.005 eth
     
     mapping(uint => uint) public artifacts;
     
-    event LootboxOpened(address by, uint tokenId, uint artifactType);
+    event LootboxOpened(address by, uint tokenId, uint artifactId);
+    
+    constructor() ERC721Full("CryptoArtifacts", "CA") public { }
     
     function random(uint lower, uint upper) private view returns (uint) {
         return (uint(keccak256(abi.encodePacked(now, msg.sender, lootboxesLeft))) % (upper-lower)) + lower;
@@ -31,18 +35,48 @@ contract CryptoArtifacts is ERC721Full("CryptoArtifacts", "CA") {
         }
     }
     
+    function getCurrentPrice() public view returns (uint) {
+        uint lootboxesSold = initialLootboxes.sub(lootboxesLeft);
+        return lootboxesSold.mul(lootboxesSold).mul(priceConstant).div(1000000);
+    }
+    
+    function toString(uint _base) internal returns (string memory) {
+        bytes memory _tmp = new bytes(32);
+        uint i;
+        for(i = 0;_base > 0;i++) {
+            _tmp[i] = bytes1((_base % 10) + 48);
+            _base /= 10;
+        }
+        bytes memory _real = new bytes(i--);
+        for(uint j = 0; j < _real.length; j++) {
+            _real[j] = _tmp[i--];
+        }
+        return string(_real);
+    }
 
     function openLootbox() public payable {
         require(lootboxesLeft >= 1, "no lootboxes left");
-        require(msg.value >= lootboxPrice, "invalid price");
+        require(msg.value >= getCurrentPrice(), "invalid price");
         
         lootboxesLeft = lootboxesLeft.sub(1);
-        //uint totalSupply = totalSupply();
         uint _id = totalSupply();
-        _mint(msg.sender, _id);
         artifacts[_id] = rollArtifactId();
-        
+        _mint(msg.sender, _id);
+        _setTokenURI(_id, toString(artifacts[_id]));
+
         emit LootboxOpened(msg.sender, _id, artifacts[_id]);
+    }
+    
+    function setBaseURI(string memory baseURI) public onlyOwner {
+        _setBaseURI(baseURI);
+    }
+    
+    
+    // TODO: check withdrawal
+    function withdraw(uint amount) public onlyOwner returns(bool) {
+        require(amount <= this.balance);
+        owner.transfer(amount);
+        return true;
     }
 
 }
