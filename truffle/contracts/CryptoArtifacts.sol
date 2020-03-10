@@ -1,7 +1,7 @@
 pragma solidity ^0.6.0;
 
 import "https://raw.githubusercontent.com/OpenZeppelin/openzeppelin-contracts/master/contracts/ownership/Ownable.sol";
-import "https://raw.githubusercontent.com/OpenZeppelin/openzeppelin-solidity/master/contracts/token/ERC721/ERC721Full.sol";
+import "https://raw.githubusercontent.com/OpenZeppelin/openzeppelin-contracts/master/contracts/token/ERC721/ERC721Full.sol";
 
 
 contract CryptoArtifacts is ERC721Full, Ownable {
@@ -40,11 +40,11 @@ contract CryptoArtifacts is ERC721Full, Ownable {
         return lootboxesSold.mul(lootboxesSold).mul(priceConstant).div(1000000);
     }
     
-    function toString(uint _base) internal returns (string memory) {
+    function toString(uint _base) internal pure returns (string memory) {
         bytes memory _tmp = new bytes(32);
         uint i;
         for(i = 0;_base > 0;i++) {
-            _tmp[i] = bytes1((_base % 10) + 48);
+            _tmp[i] = bytes1((uint8(_base) % 10) + 48);
             _base /= 10;
         }
         bytes memory _real = new bytes(i--);
@@ -71,10 +71,9 @@ contract CryptoArtifacts is ERC721Full, Ownable {
         _setBaseURI(baseURI);
     }
     
-    
-    // TODO: check withdrawal
     function withdraw(uint amount) public onlyOwner returns(bool) {
-        require(amount <= this.balance);
+        require(amount <= address(this).balance);
+        address payable owner = payable(owner());
         owner.transfer(amount);
         return true;
     }
