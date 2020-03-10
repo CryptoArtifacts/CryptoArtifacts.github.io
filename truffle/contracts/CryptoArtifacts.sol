@@ -1,7 +1,7 @@
 pragma solidity ^0.6.0;
 
-import "https://raw.githubusercontent.com/OpenZeppelin/openzeppelin-contracts/master/contracts/ownership/Ownable.sol";
-import "https://raw.githubusercontent.com/OpenZeppelin/openzeppelin-contracts/master/contracts/token/ERC721/ERC721Full.sol";
+import "../node_modules/@openzeppelin/contracts/ownership/Ownable.sol";
+import "../node_modules/@openzeppelin/contracts/token/ERC721/ERC721Full.sol";
 
 
 contract CryptoArtifacts is ERC721Full, Ownable {
