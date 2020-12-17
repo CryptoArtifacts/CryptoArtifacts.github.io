@@ -1,10 +1,10 @@
-pragma solidity ^0.6.0;
+pragma solidity >=0.6.0 <0.8.0;
 
-import "../node_modules/@openzeppelin/contracts/ownership/Ownable.sol";
-import "../node_modules/@openzeppelin/contracts/token/ERC721/ERC721Full.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/access/Ownable.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC721/ERC721.sol";
 
 
-contract CryptoArtifacts is ERC721Full, Ownable {
+contract CryptoArtifacts is ERC721, Ownable {
     
     uint constant initialLootboxes = 10000;
     uint public lootboxesLeft = initialLootboxes;
@@ -14,7 +14,7 @@ contract CryptoArtifacts is ERC721Full, Ownable {
     
     event LootboxOpened(address by, uint tokenId, uint artifactId);
     
-    constructor() ERC721Full("CryptoArtifacts", "CA") public { }
+    constructor() ERC721("CryptoArtifacts", "CA") public { }
     
     function random(uint lower, uint upper) private view returns (uint) {
         return (uint(keccak256(abi.encodePacked(now, msg.sender, lootboxesLeft))) % (upper-lower)) + lower;
