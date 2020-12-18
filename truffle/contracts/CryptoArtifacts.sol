@@ -1,10 +1,13 @@
+// SPDX-License-Identifier: MIT
+
 pragma solidity >=0.6.0 <0.8.0;
 
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/access/Ownable.sol";
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC721/ERC721.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/payment/PullPayment.sol";
 
 
-contract CryptoArtifacts is ERC721, Ownable {
+contract CryptoArtifacts is ERC721, Ownable, PullPayment {
     
     uint constant initialLootboxes = 10000;
     uint public lootboxesLeft = initialLootboxes;
@@ -74,7 +77,7 @@ contract CryptoArtifacts is ERC721, Ownable {
     function withdraw(uint amount) public onlyOwner returns(bool) {
         require(amount <= address(this).balance);
         address payable owner = payable(owner());
-        owner.transfer(amount);
+        _asyncTransfer(owner, amount);
         return true;
     }
 
