@@ -9,9 +9,8 @@ import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contr
 
 contract CryptoArtifacts is ERC721, Ownable, PullPayment {
     
-    uint constant initialLootboxes = 10000;
+    uint constant initialLootboxes = 100000;
     uint public lootboxesLeft = initialLootboxes;
-    uint constant priceConstant = 5000000000000000; // 0.005 eth
     
     mapping(uint => uint) public artifacts;
     
@@ -40,7 +39,7 @@ contract CryptoArtifacts is ERC721, Ownable, PullPayment {
     
     function getCurrentPrice() public view returns (uint) {
         uint lootboxesSold = initialLootboxes.sub(lootboxesLeft);
-        return lootboxesSold.mul(lootboxesSold).mul(priceConstant).div(1000000);
+        return lootboxesSold.mul(lootboxesSold).div(10000000000);
     }
     
     function toString(uint _base) internal pure returns (string memory) {
