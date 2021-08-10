@@ -12,6 +12,7 @@ import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.2
 contract CryptoArtifacts is ERC721Enumerable, ERC721URIStorage,  Ownable, PullPayment {
     
     uint constant initialLootboxes = 21000;
+    uint constant priceConstant = 1000000000;
     uint public lootboxesLeft = initialLootboxes;
     
     mapping(uint => uint) public artifacts;
@@ -41,7 +42,7 @@ contract CryptoArtifacts is ERC721Enumerable, ERC721URIStorage,  Ownable, PullPa
     
     function getCurrentPrice() public view returns (uint) {
         uint lootboxesSold = initialLootboxes - lootboxesLeft;
-        return lootboxesSold * lootboxesSold / 1000000000 / 1 ether;
+        return lootboxesSold * lootboxesSold * (1 ether) / priceConstant;
     }
     
     function uint2str(uint _i) internal pure returns (string memory _uintAsString) {
