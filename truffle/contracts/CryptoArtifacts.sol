@@ -39,7 +39,7 @@ contract CryptoArtifacts is ERC721, Ownable, PullPayment {
     
     function getCurrentPrice() public view returns (uint) {
         uint lootboxesSold = initialLootboxes.sub(lootboxesLeft);
-        return lootboxesSold.mul(lootboxesSold).div(10000000000);
+        return lootboxesSold.mul(lootboxesSold).div(1000000000).div(1 ether);
     }
     
     function toString(uint _base) internal pure returns (string memory) {
