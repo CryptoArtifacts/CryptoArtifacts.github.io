@@ -9,7 +9,7 @@ import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contr
 
 contract CryptoArtifacts is ERC721, Ownable, PullPayment {
     
-    uint constant initialLootboxes = 100000;
+    uint constant initialLootboxes = 21000;
     uint public lootboxesLeft = initialLootboxes;
     
     mapping(uint => uint) public artifacts;
